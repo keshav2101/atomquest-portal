@@ -8,6 +8,7 @@ import { redirect } from 'next/navigation';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Topbar } from '@/components/layout/Topbar';
 import { SSEListener } from '@/components/shared/SSEListener';
+import { CommandPalette } from '@/components/layout/CommandPalette';
 
 export default async function DashboardLayout({
   children,
@@ -19,6 +20,9 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex h-screen bg-slate-50 dark:bg-slate-950 overflow-hidden">
+      {/* Real-time Command Palette */}
+      <CommandPalette />
+
       {/* SSE Real-time Listener */}
       <SSEListener token={(session.user as any).accessToken} />
 
@@ -37,3 +41,4 @@ export default async function DashboardLayout({
     </div>
   );
 }
+

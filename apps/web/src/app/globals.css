@@ -137,7 +137,7 @@
   .skeleton {
     @apply bg-gradient-to-r from-slate-100 via-slate-200 to-slate-100
            dark:from-slate-800 dark:via-slate-700 dark:to-slate-800
-           bg-[length:200%_100%] animate-shimmer rounded-lg;
+            bg-[length:200%_100%] animate-shimmer rounded-lg;
   }
 
   /* Form field */
@@ -158,15 +158,35 @@
   .page-subtitle {
     @apply text-sm text-slate-500 dark:text-slate-400 mt-1;
   }
+
+  /* Premium Glassmorphic Elements */
+  .glass-premium {
+    @apply bg-white/40 dark:bg-slate-950/40 backdrop-blur-md border border-white/20 dark:border-slate-800/60 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-300;
+  }
+
+  .glass-premium-hover {
+    @apply hover:bg-white/60 dark:hover:bg-slate-950/60 hover:shadow-[0_20px_50px_rgba(99,102,241,0.08)] hover:border-indigo-500/30 hover:-translate-y-0.5;
+  }
+
+  .neon-glow-indigo {
+    box-shadow: 0 0 40px rgba(99, 102, 241, 0.15);
+  }
+
+  .neon-glow-emerald {
+    box-shadow: 0 0 40px rgba(16, 185, 129, 0.15);
+  }
+
+  .keycap {
+    @apply inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-mono font-semibold rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 shadow-sm leading-none min-w-[16px] select-none;
+  }
 }
 
 /* ============================================================
    Scrollbar Styling
    ============================================================ */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { @apply bg-slate-100 dark:bg-slate-800; }
-::-webkit-scrollbar-thumb { @apply bg-slate-300 dark:bg-slate-600 rounded-full; }
-::-webkit-scrollbar-thumb:hover { @apply bg-slate-400 dark:bg-slate-500; }
+::-webkit-scrollbar-track { @apply bg-transparent; }
+::-webkit-scrollbar-thumb { @apply bg-slate-300/40 dark:bg-slate-700/40 rounded-full hover:bg-slate-400/60 dark:hover:bg-slate-600/60 transition-colors; }
 
 /* ============================================================
    Print Styles
@@ -175,3 +195,4 @@
   .no-print { display: none !important; }
   .sidebar { display: none !important; }
 }
+

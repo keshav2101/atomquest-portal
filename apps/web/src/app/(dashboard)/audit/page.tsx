@@ -12,6 +12,9 @@ import { getApiClient } from '@/lib/api';
 import { LoadingSkeleton } from '@/components/shared/LoadingSkeleton';
 import { formatDate } from '@/lib/utils';
 
+export const dynamic = 'force-dynamic';
+
+
 export default function AuditPage() {
   const { data: session } = useSession();
   const token = (session?.user as any)?.accessToken || '';
