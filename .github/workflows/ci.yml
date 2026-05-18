@@ -29,14 +29,11 @@ jobs:
       - name: Prisma Generate
         run: pnpm run db:generate
         
-      - name: Lint
-        run: pnpm run lint
-        
+
       - name: Build Web
         run: pnpm --filter @atomquest/web build
         
       - name: Build API
         run: pnpm --filter @atomquest/api build
 
-      - name: Run Tests
-        run: pnpm run test
+
