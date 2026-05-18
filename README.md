@@ -1,117 +1,145 @@
 # ⚡ AtomQuest: Enterprise Goal & Performance Portal
 
-AtomQuest is a premium, enterprise-grade OKR (Objectives and Key Results) and Performance Management Portal designed for **Atomberg Technologies**. Built as a high-performance monorepo, it enables seamless alignment, real-time tracking, collaborative approvals, and key metrics visualization across departments.
+AtomQuest is a state-of-the-art, enterprise-grade OKR (Objectives and Key Results) and Performance Management Portal designed for **Atomberg Technologies**. It is built as a high-performance Turborepo monorepo workspace to align team metrics, track progress, facilitate collaborative manager reviews, and visualize company performance.
+
+### 🔗 Live Production Access
+* **Live Web App (Vercel)**: [https://atomberg-igb3wciih-keshav2101s-projects.vercel.app](https://atomberg-igb3wciih-keshav2101s-projects.vercel.app)
+* **API Documentation (Railway)**: `http://localhost:4000/api/v1` (Backend service)
+* **GitHub Repository**: [https://github.com/keshav2101/atomquest-portal](https://github.com/keshav2101/atomquest-portal)
 
 ---
 
-## 🚀 Key Features
+## 📸 Styled UI Showcase
 
-- **Personal OKR Dashboards**: Custom metrics views for Employees, Managers, and Admins displaying progress tracking, strengths, streaks, and AI Copilot insights.
-- **Interactive Goal Management**: Structured goal cards supporting weighted goals, multi-unit targets (percentages, numeric milestones), shared team goals, and status locks.
-- **Collaborative Approval Workflows**: Direct check-in submissions and manager-gated review tools with automated timeline warnings.
-- **Real-Time Analytics Heatmaps**: Department-wise completion heatmaps, quarterly trend trackers, and top team performer visualizations.
-- **Enterprise-Grade RBAC**: Strict Role-Based Access Control and authentication securing sensitive employee records.
+The portal utilizes a custom-built, modern slate-indigo theme featuring premium glassmorphism layout containers, smooth Framer Motion scaling, responsive Recharts score histories, and neon-glow status cards:
+
+### 1. Sleek Employee Performance Dashboard
+An advanced interactive interface containing dynamic progress rings, streak tracking, active check-in counters, and smart **AI Copilot Insights** cards:
+![Employee Dashboard](public/screenshots/employee_dashboard.png)
+
+### 2. Beautiful OKR Goal & Metrics Listing
+Filterable goal cards displaying color-coded statuses ("Approved", "Draft"), weights, metric targets, and linear check-in sliders:
+![OKR Goals List](public/screenshots/employee_goals.png)
 
 ---
 
-## 🛠️ Monorepo Technology Stack
+## 🏛️ Project System Architecture
 
-AtomQuest is structured as a **Turborepo** + **pnpm** monorepo workspace containing three primary packages:
+AtomQuest is architected as a high-velocity **Turborepo** + **pnpm** monorepo workspace consisting of three primary layers:
 
 ```mermaid
-graph TD
-    A[apps/web - Next.js Frontend] -->|API Calls| B[apps/api - NestJS REST Backend]
-    B -->|Database Query| C[Prisma ORM & SQLite]
-    A -->|Types & Constants| D[packages/shared - TS Schema Shared]
-    B -->|Types & Constants| D
+flowchart TB
+    subgraph Client Layer [Frontend - Vercel Serverless]
+        A[Next.js 16 App] -->|NextAuth v5| A1[Session Provider]
+        A -->|Recharts| A2[Analytics Visualizer]
+        A -->|Framer Motion| A3[Micro-Animations]
+    end
+
+    subgraph Service Layer [Backend API - Railway Server]
+        B[NestJS Controller] -->|JWT Strategy| B1[RBAC Guard]
+        B -->|Services| B2[Business Logic Engine]
+        B2 -->|Audit Logger| B3[Activity Logger]
+    end
+
+    subgraph Schema Layer [Shared Types]
+        D[packages/shared] -->|Type definitions & schemas| A
+        D -->|Type definitions & schemas| B
+    end
+
+    subgraph Data Layer [Database Persistence]
+        E[Prisma ORM] -->|Auto-Generated Clients| B
+        E -->|SQLite Engine| F[(dev.db local pool)]
+    end
+
+    A -->|HTTP REST APIs| B
 ```
 
-### 1. Web Frontend (`apps/web`)
-- **Framework**: [Next.js 16 (App Router)](https://nextjs.org/) for optimized server-side rendering and client transitions.
-- **Styling**: [Tailwind CSS v3](https://tailwindcss.com/) with a custom dark-indigo glassmorphism theme, customized scrollbars, and modern font mapping.
-- **Animations**: [Framer Motion](https://www.framer.com/motion/) for fluid transitions, micro-animations, and card hover scaling.
-- **Session & Auth**: [NextAuth.js v5 (Beta)](https://authjs.dev/) managing secure credentials-based auth.
-- **Charts**: [Recharts](https://recharts.org/) for beautiful, responsive line graphs and concentric goal rings.
+---
 
-### 2. API Backend (`apps/api`)
-- **Framework**: [NestJS](https://nestjs.com/) powering a modular, standard dependency-injection REST API.
-- **Database Access**: [Prisma ORM](https://www.prisma.io/) providing automated typescript definitions and database migrations.
-- **Database Engine**: [SQLite](https://www.sqlite.org/) (configured via local file `dev.db` for rapid developer boot).
+## ⚙️ Core Application Modules (Each & Every Part)
 
-### 3. Shared Library (`packages/shared`)
-- Shareable typescript schemas, constant mappings, and formatting helpers utilized uniformly across frontend and backend packages.
+### 🔑 1. Authentication & Security Layer
+* **Standard Credentials Provider**: Secure logins utilizing `bcrypt` password encryption.
+* **NestJS JWT Validation Strategy**: Stateful sessions parsed via JSON Web Tokens on the backend using standard `JwtStrategy`.
+* **Cookie-Flushed Navigation**: Improved client-to-server redirection flushes session cookies to the browser disk, preventing NextAuth session race conditions.
+* **Role-Based Guards (RBAC)**: Strict endpoints protections enforcing access hierarchies (`ADMIN`, `MANAGER`, `EMPLOYEE`).
+
+### 📊 2. Dashboard Modules
+* **Employee View**: Custom weighted OKR totals, animated percentage rings, active streaks counters, and contextual notifications.
+* **Manager View**: Direct reports lists, delayed submissions detectors, pending check-ins approval queue, and team performance heatmaps.
+* **Admin View**: Org-wide statistics, active escalations monitors, dynamic department comparison heatmaps, and server-side activity logging viewers.
+
+### 🎯 3. Goals & OKR Management
+* **Flexible Unit of Measure (UoM)**: Support for percentage targets (`PERCENTAGE`), positive numeric targets (`NUMERIC_MAX`), or low-value targets (`NUMERIC_MIN`).
+* **Weightage Distribution Guard**: Real-time sum indicators and active warnings verifying that active goal weights total exactly **100%** before submission.
+* **Shared OKR Pools**: Share parent organizational objectives across department heads to enforce team alignment.
+* **Concurrency Locking**: Automate status locks upon goals approval to prevent unauthorized modifications.
+
+### 📝 4. Auditing & Change Logging
+* **State Change Interceptors**: Automated recording logs triggered upon goal updates, check-ins, or status transitions.
+* **Audit Database Tables**: Relational database logging tracking timestamps, changed parameters, and editor identities.
 
 ---
 
-## 🔧 Recent Critical Enhancements & Bug Fixes
+## 🛠️ Key Technical Fixes Implemented
 
-We recently resolved two critical blockers and optimized the design system's compiler:
+### 1. Paginated Endpoint API Crashing (NestJS & Prisma Type Coercion)
+* **Issue**: The API endpoints `/goals`, `/users`, and `/audit` threw a `PrismaClientValidationError` (resulting in a 500 error) because URL search strings (e.g., `page=1&limit=20`) were passed directly as string types into Prisma's `skip` and `take` fields, which strictly require `Int` values.
+* **Fix**: Implemented robust type coercion using `parseInt(..., 10)` in `GoalsService`, `UsersService`, and `AuditService` to transform values into numbers.
 
-### 1. Database-Level 500 REST API Crash Resolved
-- **Problem**: When querying paginated endpoints (such as goals, users, or audit logs), NestJS controllers extracted query parameters (`page`, `limit`) directly from raw URL queries as strings (e.g., `"20"`). Passing these directly into Prisma's `take` and `skip` commands resulted in a `PrismaClientValidationError` because Prisma strictly expects integer types.
-- **Fix**: Implemented explicit integer coercion (`parseInt(..., 10)`) within the `GoalsService`, `UsersService`, and `AuditService` before passing values to the Prisma ORM.
-
-### 2. Auth Session Cookie Race Condition Solved
-- **Problem**: Using `router.push('/dashboard')` immediately after client credentials authentication caused Next.js to evaluate the dashboard layout's server-side session checks (`auth()`) before the browser finished writing the session cookies. This triggered an immediate, unexpected redirect straight back to `/login`.
-- **Fix**: Replaced client-side transitions with a window-level reload (`window.location.href = '/dashboard'`), ensuring the browser flushes and commits the session cookie to the disk, guaranteeing redirection stability.
+### 2. Login Redirect Race Condition Eliminated
+* **Issue**: Client-side Next.js route transitions (`router.push`) evaluated server layouts (`/dashboard/layout.tsx` running `auth()`) before the browser finished writing the session cookie, causing an immediate visual bounce back to the `/login` screen.
+* **Fix**: Upgraded navigation to a window-level reload (`window.location.href = '/dashboard'`), ensuring the browser flushes all cookie assets before server component valuation.
 
 ### 3. Enabled Tailwind Compile-Time Build Pipeline
-- **Problem**: The frontend had uncompiled Tailwind directives resulting in raw unstyled text.
-- **Fix**: Added a standard `postcss.config.js` compiler configuration, installed `tailwindcss-animate`, and fully mapped custom design system tokens (such as `border-border` and extended base variables) inside `tailwind.config.ts`. The portal now displays a gorgeous dark slate interface!
-
----
-
-## 📋 Credentials & Quick-Select Demo Accounts
-
-The database comes pre-seeded with realistic employee and manager profiles. The login screen features convenient quick-select cards:
-
-| Role | Email | Password | Representative |
-| :--- | :--- | :--- | :--- |
-| **Admin / HR** | `admin@atomberg.com` | `Admin@123` | HR Administrator |
-| **Manager 1** | `manager1@atomberg.com` | `Manager@123` | Rohan Mehta |
-| **Employee 1** | `emp1@atomberg.com` | `Employee@123` | Arjun Patel |
-| **Employee 2** | `emp2@atomberg.com` | `Employee@123` | Sneha Reddy |
+* **Issue**: Uncompiled directives in `globals.css` rendered pages without Tailwind layouts.
+* **Fix**: Created the PostCSS build configuration, added `tailwindcss-animate`, and mapped design tokens (like `border-border`, `bg-background`, and font families) inside `tailwind.config.ts`.
 
 ---
 
 ## 💻 Local Installation & Setup
 
-Ensure you have [Node.js v18+](https://nodejs.org/) installed on your machine.
+Ensure you have [Node.js v18+](https://nodejs.org/) installed.
 
-### 1. Install Dependencies
-Run the command via pnpm (using `npx` if pnpm is not in your global system PATH):
+### 1. Install Workspace Dependencies
+Execute the monorepo package installation using `npx` (if pnpm is not in your global system path):
 ```bash
 npx pnpm install
 ```
 
-### 2. Initialize Database & Seed
-Prepare the Prisma ORM schemas, run database migrations, and seed demo accounts:
+### 2. Database Sync & Seeding
+Generate the local Prisma Client, execute migrations, and seed mock users:
 ```bash
-# Generate Prisma Client types
+# Generate types
 npx pnpm db:generate
 
-# Apply migrations
+# Sync schema migrations
 npx pnpm db:migrate
 
-# Seed demo users & metrics
+# Seed employee, manager, and admin profiles
 npx pnpm db:seed
 ```
 
-### 3. Run Development Servers
-Start both backend API server and Next.js frontend dev server simultaneously in hot-reload mode:
+### 3. Start Hot-Reload Dev Servers
+Launch both NestJS REST server and Next.js frontend concurrently:
 ```bash
 npx pnpm dev
 ```
-- Frontend app: [http://localhost:3000](http://localhost:3000)
-- Backend API docs: [http://localhost:4000/api/v1](http://localhost:4000/api/v1)
+* Deployed Frontend: [http://localhost:3000](http://localhost:3000)
+* REST API Gateway: [http://localhost:4000/api/v1](http://localhost:4000/api/v1)
 
 ---
 
-## 🌐 Production Deployment
+## 👥 Seeded Demo Login Credentials
 
-The codebase is configured for GitOps deployment workflows:
-- **Frontend (Vercel)**: Deploys using standard Next.js edge build paths specified in `vercel.json`.
-- **Backend (Railway / Render)**: Leverages Nixpacks builds and custom service configs inside `railway.toml`.
+The database contains pre-configured profiles for testing out workflows:
+
+| Role | Email | Password | Assigned Identity |
+| :--- | :--- | :--- | :--- |
+| **Admin / HR** | `admin@atomberg.com` | `Admin@123` | HR System Administrator |
+| **Manager 1** | `manager1@atomberg.com` | `Manager@123` | Rohan Mehta (Team Lead) |
+| **Employee 1** | `emp1@atomberg.com` | `Employee@123` | Arjun Patel (Software Engineer) |
+| **Employee 2** | `emp2@atomberg.com` | `Employee@123` | Sneha Reddy (QA Specialist) |
 
 ---
 
