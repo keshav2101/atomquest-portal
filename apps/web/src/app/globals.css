@@ -1,0 +1,177 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   CSS Custom Properties — AtomQuest Design System
+   ============================================================ */
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 238 82% 60%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 238 82% 60%;
+    --surface: 220 20% 97%;
+    --surface-elevated: 0 0% 100%;
+    --radius: 0.75rem;
+
+    /* Sidebar */
+    --sidebar-bg: 238 66% 16%;
+    --sidebar-text: 220 30% 85%;
+    --sidebar-active: 238 82% 60%;
+    --sidebar-hover: 238 50% 22%;
+    --sidebar-border: 238 50% 20%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 238 82% 65%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 238 82% 65%;
+    --surface: 222 50% 8%;
+    --surface-elevated: 222 40% 11%;
+
+    /* Sidebar dark */
+    --sidebar-bg: 238 66% 8%;
+    --sidebar-text: 220 30% 75%;
+    --sidebar-active: 238 82% 60%;
+    --sidebar-hover: 238 50% 14%;
+    --sidebar-border: 238 50% 12%;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  h1 { @apply text-2xl font-bold tracking-tight; }
+  h2 { @apply text-xl font-semibold tracking-tight; }
+  h3 { @apply text-lg font-semibold; }
+}
+
+/* ============================================================
+   Reusable Component Patterns
+   ============================================================ */
+@layer components {
+  /* Premium Card */
+  .card-glass {
+    @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border border-white/20
+           dark:border-slate-700/50 rounded-xl shadow-card;
+  }
+
+  /* KPI Card */
+  .kpi-card {
+    @apply bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800
+           p-6 shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-0.5;
+  }
+
+  /* Status Badge */
+  .status-badge {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold
+           border tracking-wide;
+  }
+  .status-draft     { @apply bg-slate-100 text-slate-700 border-slate-200; }
+  .status-submitted { @apply bg-amber-50 text-amber-700 border-amber-200; }
+  .status-approved  { @apply bg-green-50 text-green-700 border-green-200; }
+  .status-rejected  { @apply bg-red-50 text-red-700 border-red-200; }
+  .status-locked    { @apply bg-indigo-50 text-indigo-700 border-indigo-200; }
+  .status-completed { @apply bg-emerald-50 text-emerald-700 border-emerald-200; }
+
+  /* Progress Bar */
+  .progress-track {
+    @apply w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden;
+  }
+
+  /* Sidebar item */
+  .nav-item {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium
+           transition-all duration-200 cursor-pointer;
+  }
+  .nav-item-active {
+    @apply bg-white/10 text-white shadow-sm;
+  }
+  .nav-item-inactive {
+    @apply text-indigo-200 hover:bg-white/5 hover:text-white;
+  }
+
+  /* Data table row */
+  .table-row-hover {
+    @apply hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors duration-150;
+  }
+
+  /* Shimmer skeleton */
+  .skeleton {
+    @apply bg-gradient-to-r from-slate-100 via-slate-200 to-slate-100
+           dark:from-slate-800 dark:via-slate-700 dark:to-slate-800
+           bg-[length:200%_100%] animate-shimmer rounded-lg;
+  }
+
+  /* Form field */
+  .form-label {
+    @apply block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5;
+  }
+  .form-error {
+    @apply text-xs text-red-500 mt-1.5 flex items-center gap-1;
+  }
+
+  /* Page header */
+  .page-header {
+    @apply flex items-center justify-between mb-6;
+  }
+  .page-title {
+    @apply text-2xl font-bold text-slate-900 dark:text-slate-100;
+  }
+  .page-subtitle {
+    @apply text-sm text-slate-500 dark:text-slate-400 mt-1;
+  }
+}
+
+/* ============================================================
+   Scrollbar Styling
+   ============================================================ */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { @apply bg-slate-100 dark:bg-slate-800; }
+::-webkit-scrollbar-thumb { @apply bg-slate-300 dark:bg-slate-600 rounded-full; }
+::-webkit-scrollbar-thumb:hover { @apply bg-slate-400 dark:bg-slate-500; }
+
+/* ============================================================
+   Print Styles
+   ============================================================ */
+@media print {
+  .no-print { display: none !important; }
+  .sidebar { display: none !important; }
+}

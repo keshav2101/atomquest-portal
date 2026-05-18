@@ -1,0 +1,3 @@
+export const MAX_GOALS_PER_EMPLOYEE = 8;
+export const MIN_GOAL_WEIGHTAGE = 10;
+export const REQUIRED_TOTAL_WEIGHTAGE = 100;

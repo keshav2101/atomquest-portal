@@ -1,0 +1,373 @@
+// ============================================================
+// Prisma Schema — AtomQuest Goal & Performance Portal
+// Full production schema with all tables, relations, indexes
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum Role {
+  ADMIN
+  MANAGER
+  EMPLOYEE
+}
+
+enum GoalStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  REJECTED
+  LOCKED
+  COMPLETED
+}
+
+enum UoMType {
+  NUMERIC_MIN // Lower is better (e.g. defect rate)
+  NUMERIC_MAX // Higher is better (e.g. revenue)
+  PERCENTAGE  // Direct percentage value
+  TIMELINE    // Date-based completion
+  ZERO_BASED  // 0 achievement = 100% score
+}
+
+enum Quarter {
+  Q1 // July
+  Q2 // October
+  Q3 // January
+  Q4 // March/April
+}
+
+enum NotificationType {
+  GOAL_SUBMITTED
+  GOAL_APPROVED
+  GOAL_REJECTED
+  CHECKIN_REMINDER
+  ESCALATION_WARNING
+  GOAL_LOCKED
+  CYCLE_OPENED
+  COMMENT_ADDED
+}
+
+enum EscalationStatus {
+  OPEN
+  ESCALATED
+  RESOLVED
+}
+
+// ============================================================
+// CORE TABLES
+// ============================================================
+
+model Department {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  code      String   @unique @db.VarChar(10)
+  headId    String?  // FK to User (set after user creation)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users  User[]
+  teams  Team[]
+  head   User?  @relation("DepartmentHead", fields: [headId], references: [id])
+
+  @@index([code])
+}
+
+model Team {
+  id           String     @id @default(uuid())
+  name         String
+  departmentId String
+  leaderId     String?
+  createdAt    DateTime   @default(now())
+
+  department Department @relation(fields: [departmentId], references: [id])
+  members    User[]
+
+  @@index([departmentId])
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(EMPLOYEE)
+  employeeId   String   @unique @db.VarChar(20)
+  departmentId String
+  managerId    String?
+  teamId       String?
+  isActive     Boolean  @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  department        Department   @relation(fields: [departmentId], references: [id])
+  manager           User?        @relation("UserManager", fields: [managerId], references: [id])
+  directReports     User[]       @relation("UserManager")
+  team              Team?        @relation(fields: [teamId], references: [id])
+  headOfDepartment  Department[] @relation("DepartmentHead")
+
+  goals             Goal[]       @relation("GoalOwner")
+  approvedGoals     Goal[]       @relation("GoalApprover")
+  checkins          GoalCheckin[]
+  comments          GoalComment[]
+  auditLogs         AuditLog[]
+  activityLogs      ActivityLog[]
+  notifications     Notification[]
+  assignedEscalations Escalation[] @relation("EscalationAssignee")
+  createdEscalations  Escalation[] @relation("EscalationCreator")
+
+  @@index([email])
+  @@index([departmentId])
+  @@index([managerId])
+  @@index([role])
+}
+
+// ============================================================
+// GOAL TABLES
+// ============================================================
+
+model Goal {
+  id          String     @id @default(uuid())
+  title       String     @db.VarChar(200)
+  description String     @db.Text
+  thrustArea  String
+  uomType     UoMType
+  target      Float
+  achievement Float?     @default(0)
+  weightage   Float      // Must be 10–100; all goals must sum to 100
+  status      GoalStatus @default(DRAFT)
+  timeline    DateTime   // Deadline date
+  ownerId     String
+  approverId  String?    // Manager who approved/rejected
+  cycleId     String?    // Reporting cycle this goal belongs to
+
+  // Shared goal support
+  isShared    Boolean    @default(false)
+  sharedGoalId String?   // Reference to master SharedGoal record
+
+  // Locking
+  isLocked    Boolean    @default(false)
+  lockedAt    DateTime?
+  lockedById  String?
+
+  // Timestamps
+  submittedAt DateTime?
+  approvedAt  DateTime?
+  rejectedAt  DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  // Relations
+  owner        User          @relation("GoalOwner", fields: [ownerId], references: [id])
+  approver     User?         @relation("GoalApprover", fields: [approverId], references: [id])
+  cycle        ReportingCycle? @relation(fields: [cycleId], references: [id])
+  sharedGoal   SharedGoal?   @relation(fields: [sharedGoalId], references: [id])
+  checkins     GoalCheckin[]
+  comments     GoalComment[]
+  auditLogs    AuditLog[]
+  kpiHistory   KPIHistory[]
+
+  @@index([ownerId])
+  @@index([status])
+  @@index([cycleId])
+  @@index([isShared])
+  @@index([thrustArea])
+}
+
+model SharedGoal {
+  id          String   @id @default(uuid())
+  title       String   @db.VarChar(200)
+  description String   @db.Text
+  thrustArea  String
+  uomType     UoMType
+  target      Float    // Read-only for linked employees
+  achievement Float?   @default(0)
+  timeline    DateTime
+  cycleId     String?
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  cycle   ReportingCycle? @relation(fields: [cycleId], references: [id])
+  linkedGoals Goal[]       // Individual goals linked to this shared goal
+
+  @@index([cycleId])
+}
+
+model GoalCheckin {
+  id              String   @id @default(uuid())
+  goalId          String
+  quarter         Quarter
+  achievement     Float
+  progressPercent Float    // Computed at time of check-in
+  notes           String?  @db.Text
+  createdById     String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  goal       Goal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  createdBy  User @relation(fields: [createdById], references: [id])
+
+  @@unique([goalId, quarter])  // One check-in per goal per quarter
+  @@index([goalId])
+  @@index([quarter])
+}
+
+model GoalComment {
+  id        String   @id @default(uuid())
+  goalId    String
+  content   String   @db.Text
+  authorId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  goal   Goal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  author User @relation(fields: [authorId], references: [id])
+
+  @@index([goalId])
+  @@index([authorId])
+}
+
+// ============================================================
+// AUDIT & ACTIVITY LOGS
+// ============================================================
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  entityType  String   // 'Goal', 'User', 'Checkin', etc.
+  entityId    String
+  action      String   // 'CREATE', 'UPDATE', 'APPROVE', 'REJECT', 'LOCK', etc.
+  changedById String
+  before      Json?    // Previous state snapshot
+  after       Json?    // New state snapshot
+  metadata    Json?    // Additional context
+  goalId      String?  // Optional direct FK for quick goal-scoped queries
+  createdAt   DateTime @default(now())
+
+  changedBy User  @relation(fields: [changedById], references: [id])
+  goal      Goal? @relation(fields: [goalId], references: [id])
+
+  @@index([entityType, entityId])
+  @@index([changedById])
+  @@index([goalId])
+  @@index([createdAt])
+}
+
+model ActivityLog {
+  id          String   @id @default(uuid())
+  userId      String
+  action      String   // Human-readable: "Logged in", "Created goal", etc.
+  ipAddress   String?
+  userAgent   String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// ============================================================
+// NOTIFICATION SYSTEM
+// ============================================================
+
+model Notification {
+  id          String           @id @default(uuid())
+  type        NotificationType
+  title       String
+  message     String           @db.Text
+  recipientId String
+  isRead      Boolean          @default(false)
+  readAt      DateTime?
+  linkUrl     String?
+  metadata    Json?
+  createdAt   DateTime         @default(now())
+
+  recipient User @relation(fields: [recipientId], references: [id])
+
+  @@index([recipientId, isRead])
+  @@index([createdAt])
+}
+
+// ============================================================
+// ESCALATION ENGINE
+// ============================================================
+
+model Escalation {
+  id            String           @id @default(uuid())
+  type          String           // 'GOAL_NOT_SUBMITTED', 'APPROVAL_PENDING', 'CHECKIN_INCOMPLETE'
+  description   String           @db.Text
+  targetId      String           // Goal ID or User ID that triggered escalation
+  targetType    String           // 'Goal' or 'User'
+  level         Int              @default(1) // 1=Employee, 2=Manager, 3=SkipLevel, 4=HR
+  status        EscalationStatus @default(OPEN)
+  assignedToId  String
+  createdById   String
+  resolvedAt    DateTime?
+  resolvedNote  String?          @db.Text
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  assignedTo User @relation("EscalationAssignee", fields: [assignedToId], references: [id])
+  createdBy  User @relation("EscalationCreator", fields: [createdById], references: [id])
+
+  @@index([status])
+  @@index([assignedToId])
+  @@index([targetId])
+}
+
+// ============================================================
+// REPORTING CYCLE
+// ============================================================
+
+model ReportingCycle {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  year      Int
+  q1Start   DateTime
+  q1End     DateTime
+  q2Start   DateTime
+  q2End     DateTime
+  q3Start   DateTime
+  q3End     DateTime
+  q4Start   DateTime
+  q4End     DateTime
+  isActive  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  goals       Goal[]
+  sharedGoals SharedGoal[]
+
+  @@index([year])
+  @@index([isActive])
+}
+
+// ============================================================
+// KPI HISTORY
+// ============================================================
+
+model KPIHistory {
+  id         String   @id @default(uuid())
+  goalId     String
+  quarter    Quarter
+  value      Float    // Progress value at time of recording
+  recordedAt DateTime @default(now())
+
+  goal Goal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  @@index([goalId])
+  @@index([quarter])
+}
