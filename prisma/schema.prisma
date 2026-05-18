@@ -8,60 +8,25 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 // ============================================================
 // ENUMS
 // ============================================================
 
-enum Role {
-  ADMIN
-  MANAGER
-  EMPLOYEE
-}
 
-enum GoalStatus {
-  DRAFT
-  SUBMITTED
-  APPROVED
-  REJECTED
-  LOCKED
-  COMPLETED
-}
 
-enum UoMType {
-  NUMERIC_MIN // Lower is better (e.g. defect rate)
-  NUMERIC_MAX // Higher is better (e.g. revenue)
-  PERCENTAGE  // Direct percentage value
-  TIMELINE    // Date-based completion
-  ZERO_BASED  // 0 achievement = 100% score
-}
 
-enum Quarter {
-  Q1 // July
-  Q2 // October
-  Q3 // January
-  Q4 // March/April
-}
 
-enum NotificationType {
-  GOAL_SUBMITTED
-  GOAL_APPROVED
-  GOAL_REJECTED
-  CHECKIN_REMINDER
-  ESCALATION_WARNING
-  GOAL_LOCKED
-  CYCLE_OPENED
-  COMMENT_ADDED
-}
 
-enum EscalationStatus {
-  OPEN
-  ESCALATED
-  RESOLVED
-}
+
+
+
+
+
+
 
 // ============================================================
 // CORE TABLES
@@ -70,7 +35,7 @@ enum EscalationStatus {
 model Department {
   id        String   @id @default(uuid())
   name      String   @unique
-  code      String   @unique @db.VarChar(10)
+  code      String   @unique 
   headId    String?  // FK to User (set after user creation)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -100,8 +65,8 @@ model User {
   name         String
   email        String   @unique
   passwordHash String
-  role         Role     @default(EMPLOYEE)
-  employeeId   String   @unique @db.VarChar(20)
+  role String     @default("EMPLOYEE")
+  employeeId   String   @unique 
   departmentId String
   managerId    String?
   teamId       String?
@@ -139,14 +104,14 @@ model User {
 
 model Goal {
   id          String     @id @default(uuid())
-  title       String     @db.VarChar(200)
-  description String     @db.Text
+  title       String     
+  description String     
   thrustArea  String
-  uomType     UoMType
+  uomType String
   target      Float
   achievement Float?     @default(0)
   weightage   Float      // Must be 10–100; all goals must sum to 100
-  status      GoalStatus @default(DRAFT)
+  status String @default("DRAFT")
   timeline    DateTime   // Deadline date
   ownerId     String
   approverId  String?    // Manager who approved/rejected
@@ -187,10 +152,10 @@ model Goal {
 
 model SharedGoal {
   id          String   @id @default(uuid())
-  title       String   @db.VarChar(200)
-  description String   @db.Text
+  title       String   
+  description String   
   thrustArea  String
-  uomType     UoMType
+  uomType String
   target      Float    // Read-only for linked employees
   achievement Float?   @default(0)
   timeline    DateTime
@@ -208,10 +173,10 @@ model SharedGoal {
 model GoalCheckin {
   id              String   @id @default(uuid())
   goalId          String
-  quarter         Quarter
+  quarter String
   achievement     Float
   progressPercent Float    // Computed at time of check-in
-  notes           String?  @db.Text
+  notes           String?  
   createdById     String
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -227,7 +192,7 @@ model GoalCheckin {
 model GoalComment {
   id        String   @id @default(uuid())
   goalId    String
-  content   String   @db.Text
+  content   String   
   authorId  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -249,9 +214,9 @@ model AuditLog {
   entityId    String
   action      String   // 'CREATE', 'UPDATE', 'APPROVE', 'REJECT', 'LOCK', etc.
   changedById String
-  before      Json?    // Previous state snapshot
-  after       Json?    // New state snapshot
-  metadata    Json?    // Additional context
+  before      String?    // Previous state snapshot
+  after       String?    // New state snapshot
+  metadata    String?    // Additional context
   goalId      String?  // Optional direct FK for quick goal-scoped queries
   createdAt   DateTime @default(now())
 
@@ -270,7 +235,7 @@ model ActivityLog {
   action      String   // Human-readable: "Logged in", "Created goal", etc.
   ipAddress   String?
   userAgent   String?
-  metadata    Json?
+  metadata    String?
   createdAt   DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
@@ -285,14 +250,14 @@ model ActivityLog {
 
 model Notification {
   id          String           @id @default(uuid())
-  type        NotificationType
+  type String
   title       String
-  message     String           @db.Text
+  message     String           
   recipientId String
   isRead      Boolean          @default(false)
   readAt      DateTime?
   linkUrl     String?
-  metadata    Json?
+  metadata    String?
   createdAt   DateTime         @default(now())
 
   recipient User @relation(fields: [recipientId], references: [id])
@@ -308,15 +273,15 @@ model Notification {
 model Escalation {
   id            String           @id @default(uuid())
   type          String           // 'GOAL_NOT_SUBMITTED', 'APPROVAL_PENDING', 'CHECKIN_INCOMPLETE'
-  description   String           @db.Text
+  description   String           
   targetId      String           // Goal ID or User ID that triggered escalation
   targetType    String           // 'Goal' or 'User'
   level         Int              @default(1) // 1=Employee, 2=Manager, 3=SkipLevel, 4=HR
-  status        EscalationStatus @default(OPEN)
+  status String @default("OPEN")
   assignedToId  String
   createdById   String
   resolvedAt    DateTime?
-  resolvedNote  String?          @db.Text
+  resolvedNote  String?          
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
 
@@ -362,7 +327,7 @@ model ReportingCycle {
 model KPIHistory {
   id         String   @id @default(uuid())
   goalId     String
-  quarter    Quarter
+  quarter String
   value      Float    // Progress value at time of recording
   recordedAt DateTime @default(now())
 

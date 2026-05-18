@@ -2,6 +2,14 @@
 // NestJS Application Entry Point — AtomQuest Portal
 // ============================================================
 
+import * as prismaClient from '@prisma/client';
+(prismaClient as any).Role = { ADMIN: 'ADMIN', MANAGER: 'MANAGER', EMPLOYEE: 'EMPLOYEE' };
+(prismaClient as any).GoalStatus = { DRAFT: 'DRAFT', SUBMITTED: 'SUBMITTED', APPROVED: 'APPROVED', REJECTED: 'REJECTED', LOCKED: 'LOCKED', COMPLETED: 'COMPLETED' };
+(prismaClient as any).UoMType = { NUMERIC_MIN: 'NUMERIC_MIN', NUMERIC_MAX: 'NUMERIC_MAX', PERCENTAGE: 'PERCENTAGE', TIMELINE: 'TIMELINE', ZERO_BASED: 'ZERO_BASED' };
+(prismaClient as any).Quarter = { Q1: 'Q1', Q2: 'Q2', Q3: 'Q3', Q4: 'Q4' };
+(prismaClient as any).NotificationType = { GOAL_SUBMITTED: 'GOAL_SUBMITTED', GOAL_APPROVED: 'GOAL_APPROVED', GOAL_REJECTED: 'GOAL_REJECTED', CHECKIN_REMINDER: 'CHECKIN_REMINDER', ESCALATION_WARNING: 'ESCALATION_WARNING', GOAL_LOCKED: 'GOAL_LOCKED', CYCLE_OPENED: 'CYCLE_OPENED', COMMENT_ADDED: 'COMMENT_ADDED' };
+(prismaClient as any).EscalationStatus = { OPEN: 'OPEN', ESCALATED: 'ESCALATED', RESOLVED: 'RESOLVED' };
+
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';

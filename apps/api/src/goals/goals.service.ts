@@ -99,9 +99,9 @@ export class GoalsService {
         entityId: goalId,
         action,
         changedById,
-        before: before ?? undefined,
-        after: after ?? undefined,
-        metadata: metadata ?? undefined,
+        before: before ? JSON.stringify(before) : undefined,
+        after: after ? JSON.stringify(after) : undefined,
+        metadata: metadata ? JSON.stringify(metadata) : undefined,
         goalId,
       },
     });
@@ -128,7 +128,9 @@ export class GoalsService {
       currentUser,
     } = params;
 
-    const skip = (page - 1) * limit;
+    const pageNum = parseInt(page as any, 10) || 1;
+    const limitNum = parseInt(limit as any, 10) || 20;
+    const skip = (pageNum - 1) * limitNum;
     const where: any = {};
 
     // RBAC: employees only see their own goals
@@ -165,13 +167,13 @@ export class GoalsService {
         where,
         select: GOAL_SELECT,
         skip,
-        take: limit,
+        take: limitNum,
         orderBy,
       }),
       this.prisma.goal.count({ where }),
     ]);
 
-    return { goals, total, page, limit, totalPages: Math.ceil(total / limit) };
+    return { goals, total, page: pageNum, limit: limitNum, totalPages: Math.ceil(total / limitNum) };
   }
 
   async findOne(id: string, currentUser: { id: string; role: Role }) {

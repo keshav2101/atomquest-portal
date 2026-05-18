@@ -84,9 +84,9 @@ export class ApprovalsService {
         entityId: goalId,
         action: isApprove ? 'APPROVE' : 'REJECT',
         changedById: manager.id,
-        before: { status: GoalStatus.SUBMITTED },
-        after: { status: updated.status, isLocked: updated.isLocked },
-        metadata: dto.comment ? { comment: dto.comment } : undefined,
+        before: JSON.stringify({ status: GoalStatus.SUBMITTED }),
+        after: JSON.stringify({ status: updated.status, isLocked: updated.isLocked }),
+        metadata: dto.comment ? JSON.stringify({ comment: dto.comment }) : undefined,
         goalId,
       },
     });

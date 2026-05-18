@@ -77,7 +77,7 @@ export class CheckinsService {
       );
     }
 
-    const progressPercent = this.computeProgress(goal.uomType, goal.target, dto.achievement);
+    const progressPercent = this.computeProgress(goal.uomType as UoMType, goal.target, dto.achievement);
 
     const checkin = await this.prisma.goalCheckin.create({
       data: {
@@ -123,7 +123,7 @@ export class CheckinsService {
         entityId: checkin.id,
         action: 'CREATE_CHECKIN',
         changedById: currentUser.id,
-        after: { quarter: dto.quarter, achievement: dto.achievement, progressPercent },
+        after: JSON.stringify({ quarter: dto.quarter, achievement: dto.achievement, progressPercent }),
         goalId: dto.goalId,
       },
     });

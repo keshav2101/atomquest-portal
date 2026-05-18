@@ -19,7 +19,9 @@ export class AuditService {
     limit?: number;
   }) {
     const { entityType, entityId, changedById, action, from, to, page = 1, limit = 50 } = params;
-    const skip = (page - 1) * limit;
+    const pageNum = parseInt(page as any, 10) || 1;
+    const limitNum = parseInt(limit as any, 10) || 50;
+    const skip = (pageNum - 1) * limitNum;
 
     const where: any = {};
     if (entityType) where.entityType = entityType;
@@ -37,12 +39,12 @@ export class AuditService {
         where,
         orderBy: { createdAt: 'desc' },
         skip,
-        take: limit,
+        take: limitNum,
         include: { changedBy: { select: { id: true, name: true, role: true } } },
       }),
       this.prisma.auditLog.count({ where }),
     ]);
 
-    return { logs, total, page, limit, totalPages: Math.ceil(total / limit) };
+    return { logs, total, page: pageNum, limit: limitNum, totalPages: Math.ceil(total / limitNum) };
   }
 }

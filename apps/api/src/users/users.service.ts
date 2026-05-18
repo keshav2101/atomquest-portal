@@ -38,7 +38,9 @@ export class UsersService {
     limit?: number;
   }) {
     const { role, departmentId, search, page = 1, limit = 20 } = params;
-    const skip = (page - 1) * limit;
+    const pageNum = parseInt(page as any, 10) || 1;
+    const limitNum = parseInt(limit as any, 10) || 20;
+    const skip = (pageNum - 1) * limitNum;
 
     const where: any = {};
     if (role) where.role = role;
@@ -56,13 +58,13 @@ export class UsersService {
         where,
         select: USER_SELECT,
         skip,
-        take: limit,
+        take: limitNum,
         orderBy: { createdAt: 'desc' },
       }),
       this.prisma.user.count({ where }),
     ]);
 
-    return { users, total, page, limit, totalPages: Math.ceil(total / limit) };
+    return { users, total, page: pageNum, limit: limitNum, totalPages: Math.ceil(total / limitNum) };
   }
 
   async findOne(id: string) {
@@ -108,7 +110,7 @@ export class UsersService {
         entityId: user.id,
         action: 'CREATE',
         changedById: createdById,
-        after: { name: user.name, email: user.email, role: user.role },
+        after: JSON.stringify({ name: user.name, email: user.email, role: user.role }),
       },
     });
 
@@ -142,8 +144,8 @@ export class UsersService {
         entityId: id,
         action: 'UPDATE',
         changedById: updatedById,
-        before: user,
-        after: updated,
+        before: JSON.stringify(user),
+        after: JSON.stringify(updated),
       },
     });
 

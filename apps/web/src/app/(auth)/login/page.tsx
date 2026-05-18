@@ -61,8 +61,7 @@ export default function LoginPage() {
         toast.error('Invalid email or password. Please try again.');
       } else {
         toast.success('Welcome back! Redirecting...');
-        router.push('/dashboard');
-        router.refresh();
+        window.location.href = '/dashboard';
       }
     } catch {
       toast.error('Something went wrong. Please try again.');
