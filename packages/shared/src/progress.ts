@@ -3,7 +3,7 @@
 // Pure functions — testable, used on both client and server
 // ============================================================
 
-import { UoMType } from '../types';
+import { UoMType } from './types';
 
 /**
  * Clamps a number between min and max (inclusive).

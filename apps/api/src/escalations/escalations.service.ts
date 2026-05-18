@@ -127,7 +127,6 @@ export class EscalationsService {
             targetId: goal.id,
             type: 'CHECKIN_INCOMPLETE',
             status: EscalationStatus.OPEN,
-            metadata: { path: ['quarter'], equals: activeQuarter },
           },
         });
         if (!existing) {
