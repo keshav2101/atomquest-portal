@@ -25,6 +25,10 @@ Filterable goal cards displaying color-coded statuses ("Approved", "Draft"), wei
 
 ## 🏛️ Project System Architecture
 
+The portal leverages a highly structured, scalable three-tier monorepo architecture:
+
+![System Architecture Diagram](public/screenshots/system_architecture.png)
+
 AtomQuest is architected as a high-velocity **Turborepo** + **pnpm** monorepo workspace consisting of three primary layers:
 
 ```mermaid
